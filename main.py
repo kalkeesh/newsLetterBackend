@@ -45,9 +45,9 @@ async def upload_item(title: str = Form(...), description: str = Form(...), file
     
     return JSONResponse(content={"message": "Item uploaded successfully."})
 
-# Endpoint to get all items
+
 def serialize_item(item):
-    item["_id"] = str(item["_id"])  # Convert ObjectId to string
+    item["_id"] = str(item["_id"])  
     return item
 @app.get("/all_items")
 async def get_items():
@@ -55,54 +55,36 @@ async def get_items():
     items = await items_cursor.to_list(length=100)
     
     if items:
-        # Serialize each item to convert ObjectId to string
+        
         serialized_items = [serialize_item(item) for item in items]
         return JSONResponse(content={"items": serialized_items})
     else:
         return JSONResponse(content={"message": "No items found."}, status_code=404)
 
-# Endpoint to get items by date
+
 @app.get("/items_by_date")
 async def get_items_by_date(date: str):
     try:
-        # Validate date format
+        
         datetime.strptime(date, "%d-%m-%Y")
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Please use DD-MM-YYYY.")
     
     try:
-        # Find items by date in MongoDB
+        
         items_cursor = collection.find({"date": date})
         items = await items_cursor.to_list(length=100)
         
         if items:
-            # Serialize each item to convert ObjectId to string
+            
             serialized_items = [serialize_item(item) for item in items]
             return JSONResponse(content={"items": serialized_items})
         else:
             return JSONResponse(content={"message": "No items found for the specified date."}, status_code=404)
     
     except Exception as e:
-        # Return error details for debugging
+        
         return JSONResponse(content={"message": f"Error retrieving items: {str(e)}"}, status_code=500)
-
-# En
-
-# @app.get("/items_by_date")
-# async def get_items_by_date(date: str):
-#     try:
-#         datetime.strptime(date, "%d-%m-%Y")
-#     except ValueError:
-#         raise HTTPException(status_code=400, detail="Invalid date format. Please use DD-MM-YYYY.")
-    
-    
-#     items_cursor = collection.find({"date": date})
-#     items = await items_cursor.to_list(length=100)
-    
-#     if items:
-#         return JSONResponse(content={"items": items})
-#     else:
-#         return JSONResponse(content={"message": "No items found for the specified date."}, status_code=404)
 
 @app.get("/all_dates")
 async def get_dates():
